@@ -1,0 +1,1 @@
+Este repositorio contiene el desarrollo del trabajo de campo para la cátedra de Ingeniería de Software II de la Facultad de Ciencias Exactas y Naturales y Agrimensura (FaCENA) - Universidad Nacional del Nordeste (UNNE).
