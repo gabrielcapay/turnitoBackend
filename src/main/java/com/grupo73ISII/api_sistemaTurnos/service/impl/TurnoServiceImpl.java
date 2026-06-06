@@ -71,7 +71,7 @@ public class TurnoServiceImpl implements ITurnoService {
             throw new RuntimeException("La nueva fecha y horario para el turno no están disponibles.");
         }
 
-        // 4.S: Verifica que la reserva está paga
+        // 4.S: Verifica que la reserva este paga
         if (!facturacionService.estaPagada(turno.getReserva().getFacturacion().getIdFacturacion())) {
             throw new RuntimeException("No se puede modificar un turno que no está pagado.");
         }
@@ -79,8 +79,6 @@ public class TurnoServiceImpl implements ITurnoService {
 
         //S: Modifica el turno
         reservaService.modificarReserva(turno.getReserva(), turnoUpdateDTO.getNuevoIdFranjaHoraria(), turnoUpdateDTO.getNuevoIdCancha());
-
-        //S: Modifica el turno
         Turno turnoModificado = modificarTurno(idTurno, turnoUpdateDTO.getNuevaFechaTurno());
 
         TurnoResponseDTO response = new TurnoResponseDTO();
@@ -129,7 +127,10 @@ public class TurnoServiceImpl implements ITurnoService {
     @Transactional(readOnly = true)
     public List<DisponibilidadTurnoDTO> consultarDisponibilidad(LocalDate fecha, Long idCancha) {
         List<FranjaHoraria> todasLasFranjas = franjaHorariaService.findAll();
-        List<Turno> turnosOcupados = turnoRepository.findAllByFechaTurnoAndReserva_Cancha_Id(fecha, idCancha);
+        
+        // Se utiliza el nuevo método que filtra por estado del turno
+        List<Turno> turnosOcupados = turnoRepository.findActiveTurnosByFechaAndCancha(fecha, idCancha);
+
         Set<String> idsFranjasOcupadas = turnosOcupados.stream()
                 .map(turno -> turno.getReserva().getFranjaHoraria().getId_franjaHoraria())
                 .collect(Collectors.toSet());
@@ -150,6 +151,7 @@ public class TurnoServiceImpl implements ITurnoService {
         return turnoRepository.findAllByEstadoTurno(true);
     }
 
+    //Esto va en CLientes.
     private Cliente verificarCliente(Long idCliente) {
         if (!clienteService.validarDatos(idCliente)) {
             throw new RuntimeException("El cliente se encuentra suspendido.");

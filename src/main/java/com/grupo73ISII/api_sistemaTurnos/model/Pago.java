@@ -6,19 +6,31 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "detalle_pago")
+@Table(name = "pago")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DetallePago {
+public class Pago {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idDetallePago;
+    private Long idPago;
 
-    private String numeroTransaccion;
+    private String referenciaPago;
+
+    private double monto;
+
+    private boolean estado;
+
+    private LocalDateTime fechaPago;
+
+    private LocalDateTime fechaDevolucion;
+
+    private LocalDateTime fechaModificacion;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_metodo_pago")

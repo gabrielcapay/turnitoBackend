@@ -27,6 +27,6 @@ public class Facturacion {
     private EstadoFacturacion estadoFacturacion;
 
     @OneToOne
-    @JoinColumn(name = "id_detalle_pago")
-    private DetallePago detallePago;
+    @JoinColumn(name = "id_pago")
+    private Pago pago;
 }

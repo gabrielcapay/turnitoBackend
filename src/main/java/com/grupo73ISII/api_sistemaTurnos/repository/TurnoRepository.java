@@ -15,7 +15,8 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
     @Query("SELECT t FROM Turno t WHERE t.reserva.franjaHoraria.id_franjaHoraria = :idFranjaHoraria AND t.fechaTurno = :fechaTurno")
     Optional<Turno> findTurnoByFranjaAndFecha(@Param("idFranjaHoraria") String idFranjaHoraria, @Param("fechaTurno") LocalDate fechaTurno);
 
-    List<Turno> findAllByFechaTurnoAndReserva_Cancha_Id(LocalDate fecha, Long idCancha);
+    @Query("SELECT t FROM Turno t JOIN t.reserva r JOIN r.cancha c WHERE t.fechaTurno = :fecha AND c.id = :idCancha AND t.estadoTurno = true")
+    List<Turno> findActiveTurnosByFechaAndCancha(@Param("fecha") LocalDate fecha, @Param("idCancha") Long idCancha);
 
     List<Turno> findAllByEstadoTurno(boolean estado);
 }

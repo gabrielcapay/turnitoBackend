@@ -1,14 +1,14 @@
 package com.grupo73ISII.api_sistemaTurnos.service.impl;
 
-import com.grupo73ISII.api_sistemaTurnos.model.DetallePago;
 import com.grupo73ISII.api_sistemaTurnos.model.EstadoFacturacion;
 import com.grupo73ISII.api_sistemaTurnos.model.Facturacion;
 import com.grupo73ISII.api_sistemaTurnos.model.MetodoDePago;
+import com.grupo73ISII.api_sistemaTurnos.model.Pago;
 import com.grupo73ISII.api_sistemaTurnos.repository.FacturacionRepository;
-import com.grupo73ISII.api_sistemaTurnos.service.IDetallePagoService;
 import com.grupo73ISII.api_sistemaTurnos.service.IEstadoFacturacionService;
 import com.grupo73ISII.api_sistemaTurnos.service.IFacturacionService;
 import com.grupo73ISII.api_sistemaTurnos.service.IMetodoDePagoService;
+import com.grupo73ISII.api_sistemaTurnos.service.IPagoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ public class FacturacionServiceImpl implements IFacturacionService {
     @Autowired
     private IMetodoDePagoService metodoDePagoService;
     @Autowired
-    private IDetallePagoService detallePagoService;
+    private IPagoService pagoService;
     @Autowired
     private IEstadoFacturacionService estadoFacturacionService;
 
@@ -35,20 +35,20 @@ public class FacturacionServiceImpl implements IFacturacionService {
         MetodoDePago metodoDePago = metodoDePagoService.findById(idMetodoPago)
                 .orElseThrow(() -> new RuntimeException("Método de pago no encontrado"));
 
-        // El número de transacción se deja nulo inicialmente
-        DetallePago detallePago = DetallePago.builder()
+        Pago nuevoPago = Pago.builder()
                 .metodoDePago(metodoDePago)
+                .monto(valorMonetario.doubleValue())
+                .estado(false) // Inicia como no pagado
                 .build();
-        detallePagoService.save(detallePago);
+        pagoService.save(nuevoPago);
 
-        // Se asume que el ID 1 corresponde al estado 'Pendiente' o 'Iniciado'
-        EstadoFacturacion estado = estadoFacturacionService.findById(1L)
+        EstadoFacturacion estado = estadoFacturacionService.findById(1L) // Asumiendo 1L = Pendiente
                 .orElseThrow(() -> new RuntimeException("Estado de facturación inicial no encontrado"));
 
         Facturacion facturacion = Facturacion.builder()
                 .fechaRegistro(LocalDateTime.now())
                 .estadoFacturacion(estado)
-                .detallePago(detallePago)
+                .pago(nuevoPago)
                 .build();
 
         return facturacionRepository.save(facturacion);
