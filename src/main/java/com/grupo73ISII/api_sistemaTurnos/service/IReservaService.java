@@ -8,4 +8,5 @@ public interface IReservaService {
     Reserva procesarReserva(ReservaRequestDTO reservaRequestDTO);
     Reserva registrarReserva(BigDecimal monto, Long idFacturacion, Long idCancha, String idFranjaHoraria);
     Reserva modificarReserva(Reserva reserva, String nuevoIdFranjaHoraria, Long nuevoIdCancha);
+    void verificarDevolucionReserva(Long idReserva);
 }

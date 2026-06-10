@@ -22,6 +22,10 @@ public class Facturacion {
 
     private LocalDateTime fechaRegistro;
 
+    private String emailFacturacion;
+
+    private String telefonoFacturacion;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_estado_facturacion")
     private EstadoFacturacion estadoFacturacion;

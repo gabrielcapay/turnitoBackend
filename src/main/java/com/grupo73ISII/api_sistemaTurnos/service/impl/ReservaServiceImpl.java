@@ -57,6 +57,26 @@ public class ReservaServiceImpl implements IReservaService {
 
 
     @Override
+    @Transactional
+    public void verificarDevolucionReserva(Long idReserva) {
+        // obtenerFacturaPorReserva(idReserva)
+        Reserva reserva = reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada con ID: " + idReserva));
+
+        Facturacion facturacion = reserva.getFacturacion();
+        if (facturacion == null) {
+            throw new RuntimeException("No existe factura asociada a la reserva: " + idReserva);
+        }
+
+        // verifica si se realizó el pago
+        if (facturacionService.estaPagada(facturacion.getIdFacturacion())) {
+            // si está paga → genera devolución pendiente
+            facturacionService.actualizarFacturaADevolucionPendiente(facturacion.getIdFacturacion());
+        }
+        // si no está paga → no requiere devolución
+    }
+
+    @Override
     public Reserva registrarReserva(BigDecimal monto, Long idFacturacion, Long idCancha, String idFranjaHoraria) {
 
         Facturacion facturacion = facturacionService.findById(idFacturacion)

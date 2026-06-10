@@ -19,4 +19,7 @@ public class MetodoDePago {
     private Long idMetodoPago;
 
     private String descripcion;
+
+    @Column(nullable = false, columnDefinition = "double default 0.0")
+    private double recargo;
 }

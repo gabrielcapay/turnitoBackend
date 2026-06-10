@@ -14,5 +14,6 @@ public class MercadoPagoConfiguration {
     @PostConstruct
     public void init() {
         MercadoPagoConfig.setAccessToken(accessToken);
+        System.out.println("=== MP CONFIG === Access Token seteado: " + accessToken);
     }
 }

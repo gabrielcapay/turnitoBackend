@@ -12,11 +12,20 @@ import java.util.Optional;
 @Repository
 public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
-    @Query("SELECT t FROM Turno t WHERE t.reserva.franjaHoraria.id_franjaHoraria = :idFranjaHoraria AND t.fechaTurno = :fechaTurno")
-    Optional<Turno> findTurnoByFranjaAndFecha(@Param("idFranjaHoraria") String idFranjaHoraria, @Param("fechaTurno") LocalDate fechaTurno);
+    @Query("SELECT t FROM Turno t JOIN t.reserva r JOIN r.cancha c " +
+           "WHERE t.reserva.franjaHoraria.id_franjaHoraria = :idFranjaHoraria " +
+           "AND t.fechaTurno = :fechaTurno " +
+           "AND c.id = :idCancha " +
+           "AND t.estadoTurno = true")
+    Optional<Turno> findTurnoByFranjaFechaAndCancha(
+            @Param("idFranjaHoraria") String idFranjaHoraria,
+            @Param("fechaTurno") LocalDate fechaTurno,
+            @Param("idCancha") Long idCancha);
 
     @Query("SELECT t FROM Turno t JOIN t.reserva r JOIN r.cancha c WHERE t.fechaTurno = :fecha AND c.id = :idCancha AND t.estadoTurno = true")
     List<Turno> findActiveTurnosByFechaAndCancha(@Param("fecha") LocalDate fecha, @Param("idCancha") Long idCancha);
 
     List<Turno> findAllByEstadoTurno(boolean estado);
+
+    Optional<Turno> findByReserva_Facturacion_IdFacturacion(Long idFacturacion);
 }

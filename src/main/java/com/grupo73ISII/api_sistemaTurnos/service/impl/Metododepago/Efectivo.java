@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 public class Efectivo implements IMetodoDePago {
 
     @Override
-    public String ejecutarPago(double monto, Long idFactura, String datosTransaccion, String email) {
+    public String ejecutarPago(double monto, Long idFactura, String datosTransaccion, String email, String paymentMethodId) {
         // Solo registro, sin llamadas externas
-        // Genera un número de operación interno
-        return "EF-" + System.currentTimeMillis();
+        // Genera el número de referencia interno del pago en efectivo
+        return "EFE" + idFactura;
     }
 
     @Override

@@ -16,11 +16,17 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/turno")
+@RequestMapping("/api/turnos") // Cambiado a plural para seguir convenciones REST
 public class TurnoController {
 
     @Autowired
     private ITurnoService turnoService;
+
+    @GetMapping
+    public ResponseEntity<List<TurnoResponseDTO>> listarTodosLosTurnos() {
+        List<TurnoResponseDTO> turnos = turnoService.listarTodos();
+        return ResponseEntity.ok(turnos);
+    }
 
     @PostMapping
     public ResponseEntity<TurnoResponseDTO> crearTurno(@RequestBody TurnoRequestDTO turnoRequestDTO) {

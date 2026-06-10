@@ -1,6 +1,8 @@
 package com.grupo73ISII.api_sistemaTurnos.service.impl.Metododepago;
 
 import com.grupo73ISII.api_sistemaTurnos.service.IMetodoDePago;
+import com.mercadopago.MercadoPagoConfig;
+import com.mercadopago.client.common.IdentificationRequest;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.payment.PaymentCreateRequest;
 import com.mercadopago.client.payment.PaymentPayerRequest;
@@ -13,26 +15,39 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
-@Component("mercadoPago")
+@Component("mercadopago")
 public class MercadoPago implements IMetodoDePago {
 
     @Value("${mercadopago.notification-url}")
     private String notificationUrl;
 
+    @Value("${mercadopago.access-token}")
+    private String accessToken;
+
     @Override
-    public String ejecutarPago(double monto, Long idFactura, String datosTransaccion, String email) {
+    public String ejecutarPago(double monto, Long idFactura, String datosTransaccion, String email, String paymentMethodId) {
+
         try {
+            MercadoPagoConfig.setAccessToken(accessToken);
             PaymentClient client = new PaymentClient();
 
-            PaymentCreateRequest request = PaymentCreateRequest.builder()
-                .transactionAmount(new BigDecimal(monto))
-                .token(datosTransaccion)               // cardToken generado por MP en el frontend
-                .installments(1)
-                .payer(PaymentPayerRequest.builder()
-                    .email(email)
+            PaymentPayerRequest payer = PaymentPayerRequest.builder()
+                .email(email)
+                .identification(IdentificationRequest.builder()
+                    .type("DNI")
+                    .number("12345678909")
                     .build())
-                .externalReference(String.valueOf(idFactura))
-                .notificationUrl(notificationUrl)
+                .build();
+
+            PaymentCreateRequest request = PaymentCreateRequest.builder()
+                .transactionAmount(BigDecimal.valueOf(monto))
+                .token(datosTransaccion)
+                .description("Pago turno #" + idFactura)
+                .paymentMethodId(paymentMethodId)
+                .installments(1)
+                    .notificationUrl(notificationUrl)
+                    .externalReference(String.valueOf(idFactura))
+                .payer(payer)
                 .build();
 
             Payment payment = client.create(request);

@@ -1,9 +1,6 @@
 package com.grupo73ISII.api_sistemaTurnos.service.impl;
 
-import com.grupo73ISII.api_sistemaTurnos.dto.DisponibilidadTurnoDTO;
-import com.grupo73ISII.api_sistemaTurnos.dto.TurnoRequestDTO;
-import com.grupo73ISII.api_sistemaTurnos.dto.TurnoResponseDTO;
-import com.grupo73ISII.api_sistemaTurnos.dto.TurnoUpdateDTO;
+import com.grupo73ISII.api_sistemaTurnos.dto.*;
 import com.grupo73ISII.api_sistemaTurnos.model.Cliente;
 import com.grupo73ISII.api_sistemaTurnos.model.FranjaHoraria;
 import com.grupo73ISII.api_sistemaTurnos.model.Reserva;
@@ -16,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,16 +31,50 @@ public class TurnoServiceImpl implements ITurnoService {
     @Autowired
     private IFranjaHorariaService franjaHorariaService;
 
+    // ... (otros métodos sin cambios)
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TurnoResponseDTO> listarTodos() {
+        List<Turno> turnos = turnoRepository.findAll();
+        return turnos.stream()
+                .map(this::convertirA_DTO)
+                .collect(Collectors.toList());
+    }
+
+    private TurnoResponseDTO convertirA_DTO(Turno turno) {
+        ClienteSimplificadoDTO clienteDTO = new ClienteSimplificadoDTO(
+                turno.getCliente().getIdCliente(),
+                turno.getCliente().getPersona().getNombre(),
+                turno.getCliente().getPersona().getApellido()
+        );
+
+        return new TurnoResponseDTO(
+                turno.getIdTurno(),
+                turno.getFechaTurno(),
+                turno.getEstadoTurno(),
+                clienteDTO,
+                turno.getReserva()
+        );
+    }
+    
+    // ... (resto de los métodos sin cambios)
     @Override
     @Transactional
     public TurnoResponseDTO procesarTurno(TurnoRequestDTO turnoRequestDTO) {
+
+        validarDatos(turnoRequestDTO);
 
         // 2.S Verifica que los datos del cliente son validos
         Cliente cliente = verificarCliente(turnoRequestDTO.getIdCliente());
 
 
         // 3.S: Busca disponibilidad
-        if (verificarDisponibilidad(turnoRequestDTO.getReservaRequest().getIdFranjaHoraria(), turnoRequestDTO.getFechaTurno())) {
+        if (consultarDisponibilidad(
+                turnoRequestDTO.getReservaRequest().getIdFranjaHoraria(),
+                turnoRequestDTO.getFechaTurno(),
+                turnoRequestDTO.getReservaRequest().getIdCancha()
+        )) {
             throw new RuntimeException("El turno no está disponible en esa fecha y horario.");
         }
         // 4.S: Genera Reserva
@@ -59,15 +91,21 @@ public class TurnoServiceImpl implements ITurnoService {
     @Override
     @Transactional
     public TurnoResponseDTO editarTurno(Long idTurno, TurnoUpdateDTO turnoUpdateDTO) {
+        validarDatosActualizacion(idTurno, turnoUpdateDTO);
+
         Turno turno = turnoRepository.findById(idTurno)
                 .orElseThrow(() -> new RuntimeException("Turno no encontrado"));
+
+        if (!turno.getEstadoTurno()) {
+            throw new RuntimeException("No se puede modificar un turno cancelado.");
+        }
 
         // 2.S Verifica que los datos del cliente son validos
         verificarCliente(turno.getCliente().getIdCliente());
 
 
         // 3.S: Busca disponibilidad
-        if (verificarDisponibilidad(turnoUpdateDTO.getNuevoIdFranjaHoraria(), turnoUpdateDTO.getNuevaFechaTurno())) {
+        if (consultarDisponibilidad(turnoUpdateDTO.getNuevoIdFranjaHoraria(), turnoUpdateDTO.getNuevaFechaTurno(), turnoUpdateDTO.getNuevoIdCancha())) {
             throw new RuntimeException("La nueva fecha y horario para el turno no están disponibles.");
         }
 
@@ -89,12 +127,39 @@ public class TurnoServiceImpl implements ITurnoService {
     @Override
     @Transactional
     public void cancelarTurno(Long idTurno) {
+        // 2. Verifica que el turno exista y esté activo
         Turno turno = turnoRepository.findById(idTurno)
                 .orElseThrow(() -> new RuntimeException("Turno no encontrado"));
 
+        if (!turno.getEstadoTurno()) {
+            throw new RuntimeException("El turno ya está cancelado.");
+        }
+
+        // 3. La reserva verifica si requiere devolución
+        reservaService.verificarDevolucionReserva(turno.getReserva().getIdReserva());
+
+        // 6. Confirma la baja del turno
+        confirmarCancelacion(idTurno);
+    }
+
+    private void confirmarCancelacion(Long idTurno) {
+        Turno turno = turnoRepository.findById(idTurno)
+                .orElseThrow(() -> new RuntimeException("Turno no encontrado al confirmar cancelación."));
         turno.setEstadoTurno(false);
         turno.setFechaCancelacion(LocalDate.now());
         turnoRepository.save(turno);
+    }
+
+    @Override
+    public boolean turnoCancelado(Long idTurno) {
+        return turnoRepository.findById(idTurno)
+                .map(turno -> !turno.getEstadoTurno()) // Devuelve true si estadoTurno es false
+                .orElse(true); // Si no se encuentra el turno, se considera como no activo/cancelado
+    }
+
+    @Override
+    public Optional<Turno> findByFacturaId(Long idFactura) {
+        return turnoRepository.findByReserva_Facturacion_IdFacturacion(idFactura);
     }
 
     @Override
@@ -117,8 +182,8 @@ public class TurnoServiceImpl implements ITurnoService {
     }
 
     @Override
-    public boolean verificarDisponibilidad(String idFranjaHoraria, LocalDate fechaDeTurno) {
-        return turnoRepository.findTurnoByFranjaAndFecha(idFranjaHoraria, fechaDeTurno).isPresent();
+    public boolean consultarDisponibilidad(String idFranjaHoraria, LocalDate fechaDeTurno, Long idCancha) {
+        return turnoRepository.findTurnoByFranjaFechaAndCancha(idFranjaHoraria, fechaDeTurno, idCancha).isPresent();
     }
 
 
@@ -149,6 +214,39 @@ public class TurnoServiceImpl implements ITurnoService {
     @Transactional(readOnly = true)
     public List<Turno> listarTurnosActivos() {
         return turnoRepository.findAllByEstadoTurno(true);
+    }
+
+    private void validarDatosActualizacion(Long idTurno, TurnoUpdateDTO dto) {
+        if (idTurno == null) {
+            throw new RuntimeException("El id del turno no puede ser nulo.");
+        }
+        if (dto.getNuevaFechaTurno() == null) {
+            throw new RuntimeException("La nueva fecha del turno no puede ser nula.");
+        }
+        if (dto.getNuevoIdCancha() == null) {
+            throw new RuntimeException("El id de la cancha no puede ser nulo.");
+        }
+        if (dto.getNuevoIdFranjaHoraria() == null) {
+            throw new RuntimeException("El id de la franja horaria no puede ser nulo.");
+        }
+        if (dto.getNuevaFechaTurno().isBefore(LocalDate.now())) {
+            throw new RuntimeException("La nueva fecha del turno no puede ser anterior a la fecha actual.");
+        }
+    }
+
+    private void validarDatos(TurnoRequestDTO dto) {
+        if (dto.getIdCliente() == null) {
+            throw new RuntimeException("El id del cliente no puede ser nulo.");
+        }
+        if (dto.getReservaRequest() == null) {
+            throw new RuntimeException("Los datos de la reserva no pueden ser nulos.");
+        }
+        if (dto.getFechaTurno() == null) {
+            throw new RuntimeException("La fecha del turno no puede ser nula.");
+        }
+        if (dto.getFechaTurno().isBefore(LocalDate.now())) {
+            throw new RuntimeException("La fecha del turno no puede ser anterior a la fecha actual.");
+        }
     }
 
     //Esto va en CLientes.

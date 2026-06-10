@@ -1,6 +1,6 @@
 package com.grupo73ISII.api_sistemaTurnos.service;
 
 public interface IMetodoDePago {
-    String ejecutarPago(double monto, Long idFactura, String datosTransaccion, String email);
+    String ejecutarPago(double monto, Long idFactura, String datosTransaccion, String email, String paymentMethodId);
     void ejecutarDevolucion(String referencia);
 }
