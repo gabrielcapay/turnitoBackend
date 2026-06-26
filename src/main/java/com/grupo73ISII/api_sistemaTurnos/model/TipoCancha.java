@@ -1,5 +1,6 @@
 package com.grupo73ISII.api_sistemaTurnos.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,8 +17,13 @@ public class TipoCancha {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_Tipo_Cancha")
+    private Long idTipoDeCancha;
 
-    private String superficie;
+    @Column(nullable = false)
     private String categoria;
+
+    @Column(nullable = false)
+    private String superficie;
+
 }

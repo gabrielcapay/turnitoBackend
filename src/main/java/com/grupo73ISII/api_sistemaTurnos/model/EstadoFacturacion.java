@@ -16,7 +16,9 @@ public class EstadoFacturacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_estado_facturacion")
     private Long idEstadoFacturacion;
 
+    @Column(name = "descripcion")
     private String descripcion;
 }

@@ -18,18 +18,25 @@ public class Pago {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_pago")
     private Long idPago;
 
+    @Column(name = "numero_transaccion")
     private String numeroTransaccion;
 
+    @Column(name = "monto")
     private double monto;
 
+    @Column(name = "estado")
     private boolean estado;
 
+    @Column(name = "fecha_pago")
     private LocalDateTime fechaPago;
 
+    @Column(name = "fecha_devolucion")
     private LocalDateTime fechaDevolucion;
 
+    @Column(name = "fecha_modificacion")
     private LocalDateTime fechaModificacion;
 
     @ManyToOne(fetch = FetchType.LAZY)

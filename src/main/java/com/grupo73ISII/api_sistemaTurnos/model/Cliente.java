@@ -17,9 +17,13 @@ public class Cliente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_cliente")
     private Long idCliente;
 
+    @Column(name = "inasistencias")
     private Integer inasistencias;
+
+    @Column(name = "suspendido")
     private Boolean suspendido;
 
     @OneToOne(fetch = FetchType.LAZY)

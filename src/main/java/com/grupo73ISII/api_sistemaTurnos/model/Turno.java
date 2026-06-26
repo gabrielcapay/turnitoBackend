@@ -19,13 +19,16 @@ public class Turno {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_turno")
     private Long idTurno;
 
-    @Column(nullable = false)
+    @Column(name = "fecha_turno", nullable = false)
     private LocalDate fechaTurno;
 
+    @Column(name = "fecha_cancelacion")
     private LocalDate fechaCancelacion;
 
+    @Column(name = "estado_turno")
     private Boolean estadoTurno;
 
     @OneToOne

@@ -183,7 +183,7 @@ public class TurnoServiceImpl implements ITurnoService {
 
     @Override
     public boolean consultarDisponibilidad(String idFranjaHoraria, LocalDate fechaDeTurno, Long idCancha) {
-        return turnoRepository.findTurnoByFranjaFechaAndCancha(idFranjaHoraria, fechaDeTurno, idCancha).isPresent();
+        return turnoRepository.existeTurnoActivo(idFranjaHoraria, fechaDeTurno, idCancha);
     }
 
 

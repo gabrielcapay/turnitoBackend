@@ -77,25 +77,14 @@ public class ReservaServiceImpl implements IReservaService {
     }
 
     @Override
+    @Transactional
     public Reserva registrarReserva(BigDecimal monto, Long idFacturacion, Long idCancha, String idFranjaHoraria) {
+        // El SP inserta la reserva y devuelve el id generado
+        Long idReserva = reservaRepository.registrarReservaSP(monto, idFacturacion, idCancha, idFranjaHoraria);
 
-        Facturacion facturacion = facturacionService.findById(idFacturacion)
-                .orElseThrow(() -> new RuntimeException("Facturación no encontrada"));
-        Cancha cancha = canchaService.findById(idCancha)
-                .orElseThrow(() -> new RuntimeException("Cancha no encontrada"));
-        FranjaHoraria franjaHoraria = franjaHorariaService.findById(idFranjaHoraria)
-                .orElseThrow(() -> new RuntimeException("Franja horaria no encontrada"));
-
-
-        Reserva nuevaReserva = Reserva.builder()
-                .montoAPagar(monto)
-                .facturacion(facturacion)
-                .cancha(cancha)
-                .franjaHoraria(franjaHoraria)
-                .build();
-        
-        // 3. Guardar y devolver
-        return reservaRepository.save(nuevaReserva);
+        // Re-lee la entidad para devolverla gestionada por JPA
+        return reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada tras registrarla."));
     }
 
 

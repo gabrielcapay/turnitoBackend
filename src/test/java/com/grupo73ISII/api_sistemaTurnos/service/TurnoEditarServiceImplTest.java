@@ -62,7 +62,7 @@ class TurnoEditarServiceImplTest {
         when(turnoRepository.findById(8L)).thenReturn(Optional.of(turno));
         when(clienteService.validarDatos(12L)).thenReturn(true);
         when(clienteService.findById(12L)).thenReturn(Optional.of(turno.getCliente()));
-        when(turnoRepository.findTurnoByFranjaFechaAndCancha(any(), any(), any())).thenReturn(Optional.empty());
+        when(turnoRepository.existeTurnoActivo(any(), any(), any())).thenReturn(false);
         when(facturacionService.estaPagada(1L)).thenReturn(true);
         when(turnoRepository.save(any())).thenReturn(turnoModificado);
 
@@ -116,7 +116,7 @@ class TurnoEditarServiceImplTest {
         when(turnoRepository.findById(8L)).thenReturn(Optional.of(turno));
         when(clienteService.validarDatos(12L)).thenReturn(true);
         when(clienteService.findById(12L)).thenReturn(Optional.of(turno.getCliente()));
-        when(turnoRepository.findTurnoByFranjaFechaAndCancha(any(), any(), any())).thenReturn(Optional.of(new Turno()));
+        when(turnoRepository.existeTurnoActivo(any(), any(), any())).thenReturn(true);
 
         assertThrows(RuntimeException.class, () ->
             turnoService.editarTurno(8L, buildUpdate(LocalDate.of(2026, 6, 15), 3L, "2"))
@@ -131,7 +131,7 @@ class TurnoEditarServiceImplTest {
         when(turnoRepository.findById(8L)).thenReturn(Optional.of(turno));
         when(clienteService.validarDatos(12L)).thenReturn(true);
         when(clienteService.findById(12L)).thenReturn(Optional.of(turno.getCliente()));
-        when(turnoRepository.findTurnoByFranjaFechaAndCancha(any(), any(), any())).thenReturn(Optional.empty());
+        when(turnoRepository.existeTurnoActivo(any(), any(), any())).thenReturn(false);
         when(facturacionService.estaPagada(1L)).thenReturn(false);
 
         assertThrows(RuntimeException.class, () ->

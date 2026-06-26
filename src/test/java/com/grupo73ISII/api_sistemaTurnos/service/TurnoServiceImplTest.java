@@ -58,7 +58,7 @@ class TurnoServiceImplTest {
 
         when(clienteService.validarDatos(12L)).thenReturn(true);
         when(clienteService.findById(12L)).thenReturn(Optional.of(cliente));
-        when(turnoRepository.findTurnoByFranjaFechaAndCancha(any(), any(), any())).thenReturn(Optional.empty());
+        when(turnoRepository.existeTurnoActivo(any(), any(), any())).thenReturn(false);
         when(reservaService.procesarReserva(any())).thenReturn(reserva);
         when(turnoRepository.save(any())).thenReturn(turno);
 
@@ -95,8 +95,7 @@ class TurnoServiceImplTest {
         Cliente cliente = Cliente.builder().idCliente(12L).build();
         when(clienteService.validarDatos(12L)).thenReturn(true);
         when(clienteService.findById(12L)).thenReturn(Optional.of(cliente));
-        when(turnoRepository.findTurnoByFranjaFechaAndCancha(any(), any(), any()))
-            .thenReturn(Optional.of(new Turno()));
+        when(turnoRepository.existeTurnoActivo(any(), any(), any())).thenReturn(true);
 
         assertThrows(RuntimeException.class, () ->
             turnoService.procesarTurno(buildRequest(LocalDate.of(2026, 6, 10), 12L, buildReserva()))
@@ -109,7 +108,7 @@ class TurnoServiceImplTest {
         Cliente cliente = Cliente.builder().idCliente(12L).build();
         when(clienteService.validarDatos(12L)).thenReturn(true);
         when(clienteService.findById(12L)).thenReturn(Optional.of(cliente));
-        when(turnoRepository.findTurnoByFranjaFechaAndCancha(any(), any(), any())).thenReturn(Optional.empty());
+        when(turnoRepository.existeTurnoActivo(any(), any(), any())).thenReturn(false);
         when(reservaService.procesarReserva(any())).thenThrow(new RuntimeException("Cancha no encontrada"));
 
         assertThrows(RuntimeException.class, () ->

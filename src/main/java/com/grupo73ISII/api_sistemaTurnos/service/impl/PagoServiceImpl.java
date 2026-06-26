@@ -7,6 +7,8 @@ import com.grupo73ISII.api_sistemaTurnos.repository.PagoRepository;
 import com.grupo73ISII.api_sistemaTurnos.service.IMetodoDePago;
 import com.grupo73ISII.api_sistemaTurnos.service.IMetodoDePagoService;
 import com.grupo73ISII.api_sistemaTurnos.service.IPagoService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,9 @@ public class PagoServiceImpl implements IPagoService {
 
     @Autowired
     private IMetodoDePagoService metodoDePagoService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     private Map<String, IMetodoDePago> metodosDePago;
@@ -89,10 +94,13 @@ public class PagoServiceImpl implements IPagoService {
     public Pago registrarElPago(Long idPago, String numeroTransaccion) {
         Pago pago = findById(idPago)
                 .orElseThrow(() -> new RuntimeException("Pago no encontrado al intentar registrarlo: " + idPago));
-        pago.setNumeroTransaccion(numeroTransaccion);
-        pago.setEstado(true); // Marcar como pagado
-        pago.setFechaPago(LocalDateTime.now());
-        return save(pago);
+
+        // El UPDATE (numeroTransaccion, estado=true, fechaPago) lo hace el procedimiento en MySQL
+        pagoRepository.registrarPagoSP(idPago, numeroTransaccion);
+
+        // Refresca la entidad para devolver los datos ya actualizados por el SP
+        entityManager.refresh(pago);
+        return pago;
     }
     //-------------------------------Caso de uso solicitar devolucion-----------------------------------
     @Override

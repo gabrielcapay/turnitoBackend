@@ -15,11 +15,16 @@ public class Cancha {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_cancha")
+    private Long idCancha;
 
+    @Column(name = "numero_cancha")
     private String numeroCancha;
+
+    @Column(name = "precio_hora")
     private BigDecimal precioHora;
 
+    @Column(name = "estado_cancha")
     private Boolean estadoCancha;
 
     @ManyToOne(fetch = FetchType.LAZY)

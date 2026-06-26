@@ -16,8 +16,10 @@ public class MetodoDePago {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_metodo_pago")
     private Long idMetodoPago;
 
+    @Column(name = "descripcion")
     private String descripcion;
 
     @Column(nullable = false, columnDefinition = "double default 0.0")

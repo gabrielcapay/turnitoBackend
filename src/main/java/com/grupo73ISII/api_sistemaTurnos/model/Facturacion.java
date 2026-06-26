@@ -18,12 +18,16 @@ public class Facturacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_facturacion")
     private Long idFacturacion;
 
+    @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
 
+    @Column(name = "email_facturacion")
     private String emailFacturacion;
 
+    @Column(name = "telefono_facturacion")
     private String telefonoFacturacion;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -18,11 +18,14 @@ public class Persona {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_dato_persona")
     private Long idDatoPersona;
 
     private String nombre;
     private String apellido;
     private String telefono;
     private String email;
+
+    @Column(name = "fecha_de_registro")
     private LocalDateTime fechaDeRegistro;
 }
